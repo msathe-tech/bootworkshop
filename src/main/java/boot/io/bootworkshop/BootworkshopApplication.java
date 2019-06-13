@@ -10,6 +10,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
@@ -147,6 +156,46 @@ class Coffee {
 @Repository
 interface CoffeeRepo extends MongoRepository<Coffee, String> {
 	Coffee findByName(String name);
+}
+
+// Security configuration
+@EnableWebSecurity
+class SecurityConfig extends WebSecurityConfigurerAdapter {
+	private final PasswordEncoder pwEncoder =
+			PasswordEncoderFactories.createDelegatingPasswordEncoder();
+
+	@Override
+	protected void configure(HttpSecurity sec) throws Exception {
+		sec
+				.authorizeRequests().mvcMatchers("/actuator").hasRole("ADMIN")
+				.mvcMatchers("/actuator/*").hasRole("ADMIN")
+				.anyRequest().authenticated()
+				.and()
+				.formLogin()
+				.and()
+				.httpBasic();
+
+	}
+
+	@Bean
+	UserDetailsService authentication() {
+		UserDetails u1 = User.builder()
+				.username("u1")
+				.password(pwEncoder.encode("ComplexPassword"))
+				.roles("USER", "ADMIN")
+				.build();
+
+		UserDetails u2 = User.builder()
+				.username("u2")
+				.password(pwEncoder.encode("SimplePassword"))
+				.roles("USER")
+				.build();
+
+		System.out.println(" >>> u1 password " + u1.getPassword());
+		System.out.println(" >>> u2 password " + u2.getPassword());
+
+		return new InMemoryUserDetailsManager(u1, u2);
+	}
 }
 
 
