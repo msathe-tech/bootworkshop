@@ -1,5 +1,6 @@
 package boot.io.bootworkshop;
 
+import com.sun.tools.javac.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -73,9 +74,9 @@ class BootWorkshopController {
 	*/
 
 	@GetMapping
-	Iterable<Coffee> getAllCoffees() {
+	List<Coffee> getAllCoffees() {
 		repo.findAll().forEach(System.out::println);
-		return repo.findAll();
+		return List.from(repo.findAll());
 	}
 
 	// search for JPA model
