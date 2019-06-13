@@ -1,6 +1,6 @@
 package boot.io.bootworkshop;
 
-import com.sun.tools.javac.util.List;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +21,7 @@ import javax.persistence.Id;
 */
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -75,8 +76,10 @@ class BootWorkshopController {
 
 	@GetMapping
 	List<Coffee> getAllCoffees() {
-		repo.findAll().forEach(System.out::println);
-		return List.from(repo.findAll());
+		List<Coffee> coffees = new ArrayList<Coffee>();
+		repo.findAll().forEach(coffees::add);
+		coffees.forEach(System.out::println);
+		return coffees;
 	}
 
 	// search for JPA model
